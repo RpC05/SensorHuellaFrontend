@@ -1,26 +1,42 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { User } from 'lucide-react';
-import { api } from '@/lib/api';
+import { User, Activity } from 'lucide-react';
+import type { PageType } from '@/lib/types';
 
 interface HeaderProps {
-  currentPage: 'dashboard' | 'verification';
+  currentPage: PageType;
   userCount?: number;
 }
 
+const PAGE_TITLES: Record<PageType, string> = {
+  dashboard: 'Dashboard',
+  users: 'Gestión de Usuarios',
+  fingerprints: 'Gestión de Huellas',
+  'rfid-cards': 'Gestión de Tarjetas RFID',
+  'access-logs': 'Registros de Acceso',
+  verification: 'Verificación en Vivo',
+};
+
 export function Header({ currentPage, userCount = 0 }: HeaderProps) {
-  const pageTitle = currentPage === 'dashboard' ? 'Gestión de Usuarios' : 'Verificación en Vivo';
+  const pageTitle = PAGE_TITLES[currentPage];
 
   return (
-    <header className="h-16 border-b border-border bg-card flex items-center justify-between px-6">
-      <h2 className="text-2xl font-bold text-foreground">{pageTitle}</h2>
-      <div className="flex items-center gap-4">
-        <div className="text-sm text-muted-foreground">
-          <span className="font-semibold text-foreground">{userCount}</span> huellas registradas
+    <header className="h-16 border-b border-border bg-card flex items-center justify-between px-6 shadow-sm">
+      <div>
+        <h2 className="text-2xl font-bold text-foreground">{pageTitle}</h2>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+          <Activity className="w-3 h-3" />
+          <span>Sistema en línea</span>
         </div>
-        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-          <User className="w-6 h-6 text-primary" />
+      </div>
+      <div className="flex items-center gap-4">
+        {userCount > 0 && (
+          <div className="text-sm text-muted-foreground px-4 py-2 bg-muted/50 rounded-lg">
+            <span className="font-semibold text-foreground">{userCount}</span> usuarios registrados
+          </div>
+        )}
+        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+          <User className="w-5 h-5 text-white" />
         </div>
       </div>
     </header>
