@@ -1,168 +1,235 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
-import { UsersTable } from './users-table';
-import { EnrollmentModal } from './enrollment-modal';
-import { ConfirmDialog } from './confirm-dialog';
+import { Users, Fingerprint, CreditCard, FileText, TrendingUp, Activity } from 'lucide-react';
 import { api } from '@/lib/api';
-import type { FingerPrintResponseDTO } from '@/lib/types';
+import type { DashboardStats } from '@/lib/types';
 
 interface DashboardProps {
   onCountChange?: (count: number) => void;
 }
 
 export function Dashboard({ onCountChange }: DashboardProps) {
-  const [showEnrollModal, setShowEnrollModal] = useState(false);
-  const [showEmptyConfirm, setShowEmptyConfirm] = useState(false);
-  const [enrolledUsers, setEnrolledUsers] = useState<FingerPrintResponseDTO[]>([]);
+  const [stats, setStats] = useState<DashboardStats>({
+    totalUsers: 0,
+    totalFingerprints: 0,
+    totalCards: 0,
+    todayAccess: 0,
+  });
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const loadUsers = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const users = await api.getAllFingerprints();
-      setEnrolledUsers(users);
-      onCountChange?.(users.length);
-    } catch (err: any) {
-      setError(err.message || 'Error al cargar usuarios');
-      console.error('Error loading users:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   useEffect(() => {
-    loadUsers();
+    loadStats();
   }, []);
 
-  const handleEnrollUser = async () => {
-    setShowEnrollModal(false);
-    // Esperar un momento antes de recargar para que el backend procese
-    setTimeout(() => {
-      loadUsers();
-    }, 1000);
-  };
-
-  const handleDeleteUser = async (userId: number) => {
+  const loadStats = async () => {
+    setIsLoading(true);
     try {
-      await api.deleteFingerprint(userId);
-      // Esperar un momento antes de recargar
-      setTimeout(() => {
-        loadUsers();
-      }, 500);
-    } catch (err: any) {
-      console.error('Error deleting user:', err);
-      alert('Error al eliminar usuario: ' + err.message);
-    }
-  };
+      const [users, fingerprints, cards, todayLogs] = await Promise.all([
+        api.getAllUsers(),
+        api.getAllFingerprints(),
+        api.getAllRfidCards(),
+        api.getTodayAccesses(),
+      ]);
 
-  const handleUpdateUser = async (userId: number, userData: Partial<FingerPrintResponseDTO>) => {
-    try {
-      await api.updateFingerprint(userId, userData);
-      setTimeout(() => {
-        loadUsers();
-      }, 500);
-    } catch (err: any) {
-      console.error('Error updating user:', err);
-      alert('Error al actualizar usuario: ' + err.message);
-    }
-  };
+      const newStats = {
+        totalUsers: users.length,
+        totalFingerprints: fingerprints.length,
+        totalCards: cards.length,
+        todayAccess: todayLogs.length,
+      };
 
-  const handleEmptyDatabase = async () => {
-    setShowEmptyConfirm(false);
-    
-    try {
-      setIsLoading(true);
-      await api.emptyDatabase();
-      setTimeout(() => {
-        loadUsers();
-      }, 1000);
-    } catch (err: any) {
-      console.error('Error emptying database:', err);
-      alert('Error al vaciar la base de datos: ' + err.message);
+      setStats(newStats);
+      onCountChange?.(users.length);
+    } catch (error: any) {
+      console.error('Error loading stats:', error);
+    } finally {
       setIsLoading(false);
     }
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="flex gap-3">
-          <button
-            onClick={loadUsers}
-            disabled={isLoading}
-            className="flex items-center gap-2 px-4 py-2 bg-card border border-border text-foreground rounded-lg hover:bg-muted transition-colors disabled:opacity-50"
-          >
-            <svg 
-              className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`}
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Refrescar
-          </button>
-
-          <button
-            onClick={() => setShowEmptyConfirm(true)}
-            disabled={isLoading || enrolledUsers.length === 0}
-            className="flex items-center gap-2 px-4 py-2 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg hover:bg-destructive/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Trash2 className="w-5 h-5" />
-            Vaciar Base de Datos
-          </button>
-        </div>
-        
-        <button
-          onClick={() => setShowEnrollModal(true)}
-          className="flex items-center gap-2 px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
-        >
-          <Plus className="w-5 h-5" />
-          Enrolar Nuevo Usuario
-        </button>
+      {/* Header */}
+      <div>
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+          Dashboard General
+        </h2>
+        <p className="text-muted-foreground mt-1">
+          Vista general del sistema de control de acceso
+        </p>
       </div>
 
-      {isLoading && (
-        <div className="text-center py-8 text-muted-foreground">
-          Cargando usuarios...
+      {/* Main Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 border border-blue-500/20 rounded-xl p-6 hover:shadow-lg transition-all">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center">
+              <Users className="w-6 h-6 text-blue-400" />
+            </div>
+            <TrendingUp className="w-5 h-5 text-blue-400" />
+          </div>
+          <div className="text-4xl font-bold text-blue-500 mb-1">
+            {isLoading ? '...' : stats.totalUsers}
+          </div>
+          <div className="text-sm text-muted-foreground font-medium">
+            Usuarios Registrados
+          </div>
         </div>
-      )}
 
-      {error && (
-        <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-lg">
-          {error}
+        <div className="bg-gradient-to-br from-green-500/10 to-green-600/10 border border-green-500/20 rounded-xl p-6 hover:shadow-lg transition-all">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
+              <Fingerprint className="w-6 h-6 text-green-400" />
+            </div>
+            <Activity className="w-5 h-5 text-green-400" />
+          </div>
+          <div className="text-4xl font-bold text-green-500 mb-1">
+            {isLoading ? '...' : stats.totalFingerprints}
+          </div>
+          <div className="text-sm text-muted-foreground font-medium">
+            Huellas Enrolladas
+          </div>
         </div>
-      )}
 
-      {!isLoading && !error && (
-        <div className="bg-card rounded-lg border border-border overflow-hidden">
-          <UsersTable
-            users={enrolledUsers}
-            onDelete={handleDeleteUser}
-            onUpdate={handleUpdateUser}
-          />
+        <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 border border-purple-500/20 rounded-xl p-6 hover:shadow-lg transition-all">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center">
+              <CreditCard className="w-6 h-6 text-purple-400" />
+            </div>
+            <Activity className="w-5 h-5 text-purple-400" />
+          </div>
+          <div className="text-4xl font-bold text-purple-500 mb-1">
+            {isLoading ? '...' : stats.totalCards}
+          </div>
+          <div className="text-sm text-muted-foreground font-medium">
+            Tarjetas RFID
+          </div>
         </div>
-      )}
 
-      <EnrollmentModal
-        isOpen={showEnrollModal}
-        onClose={() => setShowEnrollModal(false)}
-        onEnroll={handleEnrollUser}
-      />
+        <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/10 border border-orange-500/20 rounded-xl p-6 hover:shadow-lg transition-all">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center">
+              <FileText className="w-6 h-6 text-orange-400" />
+            </div>
+            <TrendingUp className="w-5 h-5 text-orange-400" />
+          </div>
+          <div className="text-4xl font-bold text-orange-500 mb-1">
+            {isLoading ? '...' : stats.todayAccess}
+          </div>
+          <div className="text-sm text-muted-foreground font-medium">
+            Accesos Hoy
+          </div>
+        </div>
+      </div>
 
-      <ConfirmDialog
-        isOpen={showEmptyConfirm}
-        title="¿Vaciar Base de Datos?"
-        message="Esta acción eliminará TODAS las huellas registradas del sensor y la base de datos. Esta operación no se puede deshacer."
-        confirmText="Sí, Vaciar Todo"
-        cancelText="Cancelar"
-        onConfirm={handleEmptyDatabase}
-        onCancel={() => setShowEmptyConfirm(false)}
-      />
+      {/* System Status */}
+      <div className="bg-card border border-border rounded-xl p-6">
+        <h3 className="text-xl font-semibold mb-4">Estado del Sistema</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex items-center gap-3 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+            <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
+            <div>
+              <div className="font-medium">Sistema en Línea</div>
+              <div className="text-sm text-muted-foreground">Todos los servicios operativos</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+            <div>
+              <div className="font-medium">Sensor ESP32 Conectado</div>
+              <div className="text-sm text-muted-foreground">Listo para enrollar y verificar</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="bg-card border border-border rounded-xl p-6">
+        <h3 className="text-xl font-semibold mb-4">Accesos Rápidos</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          <button
+            onClick={() => window.location.hash = '#users'}
+            className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors text-left group"
+          >
+            <Users className="w-8 h-8 text-blue-400 mb-2 group-hover:scale-110 transition-transform" />
+            <div className="font-medium">Gestión de Usuarios</div>
+            <div className="text-sm text-muted-foreground">Crear y administrar usuarios</div>
+          </button>
+
+          <button
+            onClick={() => window.location.hash = '#fingerprints'}
+            className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors text-left group"
+          >
+            <Fingerprint className="w-8 h-8 text-green-400 mb-2 group-hover:scale-110 transition-transform" />
+            <div className="font-medium">Huellas Dactilares</div>
+            <div className="text-sm text-muted-foreground">Enrollar y gestionar huellas</div>
+          </button>
+
+          <button
+            onClick={() => window.location.hash = '#rfid-cards'}
+            className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors text-left group"
+          >
+            <CreditCard className="w-8 h-8 text-purple-400 mb-2 group-hover:scale-110 transition-transform" />
+            <div className="font-medium">Tarjetas RFID</div>
+            <div className="text-sm text-muted-foreground">Registrar y autorizar tarjetas</div>
+          </button>
+
+          <button
+            onClick={() => window.location.hash = '#access-logs'}
+            className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors text-left group"
+          >
+            <FileText className="w-8 h-8 text-orange-400 mb-2 group-hover:scale-110 transition-transform" />
+            <div className="font-medium">Registros de Acceso</div>
+            <div className="text-sm text-muted-foreground">Ver historial de accesos</div>
+          </button>
+        </div>
+      </div>
+
+      {/* Info Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-card border border-border rounded-xl p-6">
+          <h3 className="text-lg font-semibold mb-3">Información del Sistema</h3>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between py-2 border-b border-border">
+              <span className="text-muted-foreground">Versión:</span>
+              <span className="font-medium">1.0.0</span>
+            </div>
+            <div className="flex justify-between py-2 border-b border-border">
+              <span className="text-muted-foreground">Última Actualización:</span>
+              <span className="font-medium">{new Date().toLocaleDateString()}</span>
+            </div>
+            <div className="flex justify-between py-2">
+              <span className="text-muted-foreground">Modo:</span>
+              <span className="font-medium">Producción</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-xl p-6">
+          <h3 className="text-lg font-semibold mb-3">Resumen de Seguridad</h3>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-green-500"></div>
+              <span className="text-sm">
+                {stats.totalFingerprints} huellas activas en el sistema
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+              <span className="text-sm">
+                {stats.totalCards} tarjetas RFID registradas
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-orange-500"></div>
+              <span className="text-sm">
+                {stats.todayAccess} accesos registrados hoy
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
