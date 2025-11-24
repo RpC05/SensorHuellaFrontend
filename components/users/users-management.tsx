@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { UserPlus, Fingerprint, CreditCard, Pencil, Trash2, Eye, Search } from 'lucide-react';
+import { UserPlus, Fingerprint, CreditCard, Pencil, Trash2, Eye, Search, RefreshCw } from 'lucide-react';
 import { api } from '@/lib/api';
 import { toast } from '@/lib/toast';
 import { toast as sonnerToast } from 'sonner';
@@ -11,7 +11,7 @@ import { EditUserModal } from './edit-user-modal';
 import { AssignFingerprintModal } from './assign-fingerprint-modal';
 import { AssignRfidModal } from './assign-rfid-modal';
 import { UserDetailsModal } from './user-details-modal';
-import { ConfirmDialog } from './confirm-dialog';
+import { ConfirmDialog } from '../shared/confirm-dialog';
 
 interface UsersManagementProps {
     onUserCountChange?: (count: number) => void;
@@ -123,13 +123,23 @@ export function UsersManagement({ onUserCountChange }: UsersManagementProps) {
                     </p>
                 </div>
 
-                <button
-                    onClick={() => setShowCreateModal(true)}
-                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
-                >
-                    <UserPlus className="w-5 h-5" />
-                    Crear Usuario
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={loadUsers}
+                        disabled={isLoading}
+                        className="flex items-center gap-2 px-4 py-3 border border-border rounded-lg hover:bg-muted transition-colors disabled:opacity-50"
+                        title="Refrescar datos"
+                    >
+                        <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+                    </button>
+                    <button
+                        onClick={() => setShowCreateModal(true)}
+                        className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+                    >
+                        <UserPlus className="w-5 h-5" />
+                        Crear Usuario
+                    </button>
+                </div>
             </div>
 
             {/* Search Bar */}

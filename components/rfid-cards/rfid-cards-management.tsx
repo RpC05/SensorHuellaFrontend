@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { CreditCard, Scan, Trash2, ToggleLeft, ToggleRight, Shield, ShieldOff } from 'lucide-react';
+import { CreditCard, Scan, Trash2, ToggleLeft, ToggleRight, Shield, ShieldOff, RefreshCw } from 'lucide-react';
 import { api } from '@/lib/api';
 import { toast } from '@/lib/toast';
 import type { RfidCardResponseDTO } from '@/lib/types';
-import { ConfirmDialog } from './confirm-dialog';
+import { ConfirmDialog } from '../shared/confirm-dialog';
 
 export function RfidCardsManagement() {
     const [cards, setCards] = useState<RfidCardResponseDTO[]>([]);
@@ -100,14 +100,24 @@ export function RfidCardsManagement() {
                     </p>
                 </div>
 
-                <button
-                    onClick={handleScanNew}
-                    disabled={isScanning}
-                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    <Scan className={`w-5 h-5 ${isScanning ? 'animate-pulse' : ''}`} />
-                    {isScanning ? 'Escaneando...' : 'Registrar Nueva Tarjeta'}
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={loadCards}
+                        disabled={isLoading}
+                        className="flex items-center gap-2 px-4 py-3 border border-border rounded-lg hover:bg-muted transition-colors disabled:opacity-50"
+                        title="Refrescar datos"
+                    >
+                        <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+                    </button>
+                    <button
+                        onClick={handleScanNew}
+                        disabled={isScanning}
+                        className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <Scan className={`w-5 h-5 ${isScanning ? 'animate-pulse' : ''}`} />
+                        {isScanning ? 'Escaneando...' : 'Registrar Nueva Tarjeta'}
+                    </button>
+                </div>
             </div>
 
             {/* Stats Cards */}
@@ -187,8 +197,8 @@ export function RfidCardsManagement() {
                                             <button
                                                 onClick={() => handleToggleAuthorization(card)}
                                                 className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full transition-all ${card.authorized
-                                                        ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
-                                                        : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+                                                    ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
+                                                    : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
                                                     }`}
                                             >
                                                 {card.authorized ? (

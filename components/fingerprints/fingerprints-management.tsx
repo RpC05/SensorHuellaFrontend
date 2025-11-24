@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Fingerprint, Trash2, UserPlus, AlertTriangle, Search } from 'lucide-react';
+import { Fingerprint, Trash2, UserPlus, AlertTriangle, Search, RefreshCw } from 'lucide-react';
 import { api } from '@/lib/api';
 import { toast } from '@/lib/toast';
 import type { FingerPrintResponseDTO, UserResponseDTO } from '@/lib/types';
-import { ConfirmDialog } from './confirm-dialog';
+import { ConfirmDialog } from '../shared/confirm-dialog';
 
 export function FingerprintsManagement() {
     const [fingerprints, setFingerprints] = useState<FingerPrintResponseDTO[]>([]);
@@ -126,14 +126,24 @@ export function FingerprintsManagement() {
                     </p>
                 </div>
 
-                <button
-                    onClick={() => setShowEmptyConfirm(true)}
-                    disabled={isLoading || fingerprints.length === 0}
-                    className="flex items-center gap-2 px-4 py-2 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg hover:bg-destructive/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    <Trash2 className="w-5 h-5" />
-                    Vaciar Base de Datos
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={loadData}
+                        disabled={isLoading}
+                        className="flex items-center gap-2 px-4 py-3 border border-border rounded-lg hover:bg-muted transition-colors disabled:opacity-50"
+                        title="Refrescar datos"
+                    >
+                        <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+                    </button>
+                    <button
+                        onClick={() => setShowEmptyConfirm(true)}
+                        disabled={isLoading || fingerprints.length === 0}
+                        className="flex items-center gap-2 px-4 py-2 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg hover:bg-destructive/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <Trash2 className="w-5 h-5" />
+                        Vaciar Base de Datos
+                    </button>
+                </div>
             </div>
 
             {/* Info Alert */}
@@ -303,8 +313,8 @@ export function FingerprintsManagement() {
                                             key={user.id}
                                             onClick={() => setSelectedUser(user.id)}
                                             className={`w-full p-3 rounded-lg border-2 transition-all text-left ${selectedUser === user.id
-                                                    ? 'border-green-500 bg-green-500/10'
-                                                    : 'border-border hover:border-green-500/50 hover:bg-muted/50'
+                                                ? 'border-green-500 bg-green-500/10'
+                                                : 'border-border hover:border-green-500/50 hover:bg-muted/50'
                                                 }`}
                                         >
                                             <div className="font-medium">{user.fullName}</div>

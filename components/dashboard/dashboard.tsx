@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Users, Fingerprint, CreditCard, FileText, TrendingUp, Activity } from 'lucide-react';
 import { api } from '@/lib/api';
@@ -148,41 +149,41 @@ export function Dashboard({ onCountChange }: DashboardProps) {
       <div className="bg-card border border-border rounded-xl p-6">
         <h3 className="text-xl font-semibold mb-4">Accesos Rápidos</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-          <button
-            onClick={() => window.location.hash = '#users'}
-            className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors text-left group"
+          <Link
+            href="/users"
+            className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors text-left group block"
           >
             <Users className="w-8 h-8 text-blue-400 mb-2 group-hover:scale-110 transition-transform" />
             <div className="font-medium">Gestión de Usuarios</div>
             <div className="text-sm text-muted-foreground">Crear y administrar usuarios</div>
-          </button>
+          </Link>
 
-          <button
-            onClick={() => window.location.hash = '#fingerprints'}
-            className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors text-left group"
+          <Link
+            href="/fingerprints"
+            className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors text-left group block"
           >
             <Fingerprint className="w-8 h-8 text-green-400 mb-2 group-hover:scale-110 transition-transform" />
             <div className="font-medium">Huellas Dactilares</div>
             <div className="text-sm text-muted-foreground">Enrollar y gestionar huellas</div>
-          </button>
+          </Link>
 
-          <button
-            onClick={() => window.location.hash = '#rfid-cards'}
-            className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors text-left group"
+          <Link
+            href="/rfid-cards"
+            className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors text-left group block"
           >
             <CreditCard className="w-8 h-8 text-purple-400 mb-2 group-hover:scale-110 transition-transform" />
             <div className="font-medium">Tarjetas RFID</div>
             <div className="text-sm text-muted-foreground">Registrar y autorizar tarjetas</div>
-          </button>
+          </Link>
 
-          <button
-            onClick={() => window.location.hash = '#access-logs'}
-            className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors text-left group"
+          <Link
+            href="/access-logs"
+            className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors text-left group block"
           >
             <FileText className="w-8 h-8 text-orange-400 mb-2 group-hover:scale-110 transition-transform" />
             <div className="font-medium">Registros de Acceso</div>
             <div className="text-sm text-muted-foreground">Ver historial de accesos</div>
-          </button>
+          </Link>
         </div>
       </div>
 
