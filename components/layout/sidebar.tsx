@@ -21,11 +21,11 @@ export function Sidebar() {
       {/* Logo */}
       <div className="p-6 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
-            <Fingerprint className="w-6 h-6 text-white" />
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center">
+            <img src="/icon.svg" alt="Logo" className="w-10 h-10" />
           </div>
           <div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-[#11C2B0] via-[#13A9B1] to-[#0E9CB0] bg-clip-text text-transparent">
               BioAuth
             </h1>
             <p className="text-xs text-muted-foreground">Control de Acceso</p>
