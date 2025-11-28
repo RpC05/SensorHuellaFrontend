@@ -2,15 +2,15 @@
 
 import { useState } from 'react';
 import { Eye, Trash2, Edit2 } from 'lucide-react';
-import { DeleteConfirmationModal } from './delete-confirmation-modal';
+import { DeleteConfirmationModal } from '../shared/delete-confirmation-modal';
 import { UserDetailsModal } from './user-details-modal';
 import { EditUserModal } from './edit-user-modal';
-import type { FingerPrintResponseDTO } from '@/lib/types';
+import type { UserResponseDTO } from '@/lib/types';
 
 interface UsersTableProps {
-  users: FingerPrintResponseDTO[];
+  users: UserResponseDTO[];
   onDelete: (userId: number) => void;
-  onUpdate: (userId: number, userData: Partial<FingerPrintResponseDTO>) => void;
+  onUpdate: (userId: number, userData: Partial<UserResponseDTO>) => void;
 }
 
 export function UsersTable({ users, onDelete, onUpdate }: UsersTableProps) {
@@ -19,11 +19,11 @@ export function UsersTable({ users, onDelete, onUpdate }: UsersTableProps) {
     userId: 0,
     userName: '',
   });
-  const [detailsModal, setDetailsModal] = useState<{ show: boolean; user: FingerPrintResponseDTO | null }>({
+  const [detailsModal, setDetailsModal] = useState<{ show: boolean; user: UserResponseDTO | null }>({
     show: false,
     user: null,
   });
-  const [editModal, setEditModal] = useState<{ show: boolean; user: FingerPrintResponseDTO | null }>({
+  const [editModal, setEditModal] = useState<{ show: boolean; user: UserResponseDTO | null }>({
     show: false,
     user: null,
   });
@@ -37,15 +37,15 @@ export function UsersTable({ users, onDelete, onUpdate }: UsersTableProps) {
     setDeleteConfirm({ show: false, userId: 0, userName: '' });
   };
 
-  const handleViewDetails = (user: FingerPrintResponseDTO) => {
+  const handleViewDetails = (user: UserResponseDTO) => {
     setDetailsModal({ show: true, user });
   };
 
-  const handleEditClick = (user: FingerPrintResponseDTO) => {
+  const handleEditClick = (user: UserResponseDTO) => {
     setEditModal({ show: true, user });
   };
 
-  const handleSaveEdit = (userData: Partial<FingerPrintResponseDTO>) => {
+  const handleSaveEdit = (userData: Partial<UserResponseDTO>) => {
     if (editModal.user) {
       onUpdate(editModal.user.id, userData);
       setEditModal({ show: false, user: null });
@@ -68,21 +68,20 @@ export function UsersTable({ users, onDelete, onUpdate }: UsersTableProps) {
           {users.map((user) => (
             <tr key={user.id} className="border-b border-border hover:bg-muted/10 transition-colors">
               <td className="px-6 py-4 text-sm text-foreground">
-                {user.nombres} {user.apellidoPaterno} {user.apellidoMaterno}
+                {user.fullName}
               </td>
               <td className="px-6 py-4 text-sm text-foreground">
                 <span className="text-muted-foreground">{user.tipoDocumento}:</span> {user.numeroDocumento}
               </td>
               <td className="px-6 py-4 text-sm text-foreground">
-                {new Date(user.enrolledAt).toLocaleDateString('es-PE')}
+                {new Date(user.createdAt).toLocaleDateString('es-PE')}
               </td>
               <td className="px-6 py-4 text-sm">
                 <span
-                  className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                    user.active
-                      ? 'bg-accent/20 text-accent'
-                      : 'bg-muted text-muted-foreground'
-                  }`}
+                  className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${user.active
+                    ? 'bg-accent/20 text-accent'
+                    : 'bg-muted text-muted-foreground'
+                    }`}
                 >
                   {user.active ? 'Activo' : 'Inactivo'}
                 </span>
@@ -104,7 +103,7 @@ export function UsersTable({ users, onDelete, onUpdate }: UsersTableProps) {
                     <Edit2 className="w-5 h-5 text-foreground" />
                   </button>
                   <button
-                    onClick={() => handleDeleteClick(user.id, `${user.nombres} ${user.apellidoPaterno}`)}
+                    onClick={() => handleDeleteClick(user.id, user.fullName)}
                     className="p-2 hover:bg-destructive/10 rounded-lg transition-colors"
                     title="Eliminar huella"
                   >
@@ -138,9 +137,11 @@ export function UsersTable({ users, onDelete, onUpdate }: UsersTableProps) {
 
       <EditUserModal
         isOpen={editModal.show}
-        user={editModal.user}
+        user={editModal.user!}
         onClose={() => setEditModal({ show: false, user: null })}
-        onSave={handleSaveEdit}
+        onEdit={() => {
+          setEditModal({ show: false, user: null });
+        }}
       />
     </>
   );

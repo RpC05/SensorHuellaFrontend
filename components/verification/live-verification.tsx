@@ -27,9 +27,9 @@ export function LiveVerification() {
 
       if (response.found) {
         const fullName = [
-          response.nombres,
-          response.apellidoPaterno,
-          response.apellidoMaterno,
+          response.user?.nombres,
+          response.user?.apellidoPaterno,
+          response.user?.apellidoMaterno,
         ]
           .filter(Boolean)
           .join(' ');
