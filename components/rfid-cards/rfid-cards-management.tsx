@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { CreditCard, Scan, Trash2, ToggleLeft, ToggleRight, Shield, ShieldOff } from 'lucide-react';
+import { CreditCard, Scan, Trash2, ToggleLeft, ToggleRight, Shield, ShieldOff, RefreshCw } from 'lucide-react';
 import { api } from '@/lib/api';
 import { toast } from '@/lib/toast';
 import type { RfidCardResponseDTO } from '@/lib/types';
-import { ConfirmDialog } from './confirm-dialog';
+import { ConfirmDialog } from '../shared/confirm-dialog';
 
 export function RfidCardsManagement() {
     const [cards, setCards] = useState<RfidCardResponseDTO[]>([]);
@@ -23,7 +23,7 @@ export function RfidCardsManagement() {
         try {
             const data = await api.getAllRfidCards();
             setCards(data);
-            toast.success(`${data.length} tarjetas cargadas`);
+            // No mostramos toast aquí para evitar spam de notificaciones
         } catch (error: any) {
             toast.error('Error al cargar tarjetas', { description: error.message });
         } finally {
@@ -66,6 +66,22 @@ export function RfidCardsManagement() {
         }
     };
 
+    const handleToggleActiveState = async (card: RfidCardResponseDTO) => {
+        try {
+            await toast.promise(
+                api.toggleCardActiveState(card.id),
+                {
+                    loading: 'Actualizando estado...',
+                    success: card.active ? 'Tarjeta desactivada' : 'Tarjeta activada',
+                    error: 'Error al actualizar estado',
+                }
+            );
+            await loadCards();
+        } catch (error) {
+            console.error('Error toggling active state:', error);
+        }
+    };
+
     const handleDelete = async () => {
         if (!selectedCard) return;
 
@@ -100,31 +116,47 @@ export function RfidCardsManagement() {
                     </p>
                 </div>
 
-                <button
-                    onClick={handleScanNew}
-                    disabled={isScanning}
-                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    <Scan className={`w-5 h-5 ${isScanning ? 'animate-pulse' : ''}`} />
-                    {isScanning ? 'Escaneando...' : 'Registrar Nueva Tarjeta'}
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={loadCards}
+                        disabled={isLoading}
+                        className="flex items-center gap-2 px-4 py-3 border border-border rounded-lg hover:bg-muted transition-colors disabled:opacity-50"
+                        title="Refrescar datos"
+                    >
+                        <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+                    </button>
+                    <button
+                        onClick={handleScanNew}
+                        disabled={isScanning}
+                        className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <Scan className={`w-5 h-5 ${isScanning ? 'animate-pulse' : ''}`} />
+                        {isScanning ? 'Escaneando...' : 'Registrar Nueva Tarjeta'}
+                    </button>
+                </div>
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 border border-purple-500/20 rounded-lg p-4">
                     <div className="text-purple-400 text-sm font-medium">Total Tarjetas</div>
                     <div className="text-3xl font-bold text-purple-500 mt-1">{cards.length}</div>
                 </div>
                 <div className="bg-gradient-to-br from-green-500/10 to-green-600/10 border border-green-500/20 rounded-lg p-4">
-                    <div className="text-green-400 text-sm font-medium">Autorizadas</div>
+                    <div className="text-green-400 text-sm font-medium">Activas</div>
                     <div className="text-3xl font-bold text-green-500 mt-1">
-                        {cards.filter(c => c.authorized).length}
+                        {cards.filter(c => c.active).length}
                     </div>
                 </div>
                 <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 border border-blue-500/20 rounded-lg p-4">
-                    <div className="text-blue-400 text-sm font-medium">Asignadas</div>
+                    <div className="text-blue-400 text-sm font-medium">Autorizadas</div>
                     <div className="text-3xl font-bold text-blue-500 mt-1">
+                        {cards.filter(c => c.authorized).length}
+                    </div>
+                </div>
+                <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/10 border border-amber-500/20 rounded-lg p-4">
+                    <div className="text-amber-400 text-sm font-medium">Asignadas</div>
+                    <div className="text-3xl font-bold text-amber-500 mt-1">
                         {cards.filter(c => c.user).length}
                     </div>
                 </div>
@@ -155,6 +187,7 @@ export function RfidCardsManagement() {
                                     <th className="px-6 py-4 text-left text-sm font-semibold">UID Tarjeta</th>
                                     <th className="px-6 py-4 text-left text-sm font-semibold">Usuario Asignado</th>
                                     <th className="px-6 py-4 text-left text-sm font-semibold">Fecha Registro</th>
+                                    <th className="px-6 py-4 text-center text-sm font-semibold">Estado</th>
                                     <th className="px-6 py-4 text-center text-sm font-semibold">Autorización</th>
                                     <th className="px-6 py-4 text-center text-sm font-semibold">Acciones</th>
                                 </tr>
@@ -185,10 +218,31 @@ export function RfidCardsManagement() {
                                         </td>
                                         <td className="px-6 py-4 text-center">
                                             <button
+                                                onClick={() => handleToggleActiveState(card)}
+                                                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full transition-all ${card.active
+                                                    ? 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30'
+                                                    : 'bg-gray-500/20 text-gray-400 hover:bg-gray-500/30'
+                                                    }`}
+                                            >
+                                                {card.active ? (
+                                                    <>
+                                                        <ToggleRight className="w-4 h-4" />
+                                                        <span className="text-xs font-medium">Activa</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <ToggleLeft className="w-4 h-4" />
+                                                        <span className="text-xs font-medium">Inactiva</span>
+                                                    </>
+                                                )}
+                                            </button>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <button
                                                 onClick={() => handleToggleAuthorization(card)}
                                                 className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full transition-all ${card.authorized
-                                                        ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
-                                                        : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+                                                    ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
+                                                    : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
                                                     }`}
                                             >
                                                 {card.authorized ? (

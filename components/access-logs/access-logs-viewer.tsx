@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileText, Filter, Download, Shield, ShieldOff, Calendar } from 'lucide-react';
+import { FileText, Filter, Download, Shield, ShieldOff, Calendar, RefreshCw } from 'lucide-react';
 import { api } from '@/lib/api';
 import { toast } from '@/lib/toast';
 import type { AccessLogResponseDTO } from '@/lib/types';
@@ -131,9 +131,10 @@ export function AccessLogsViewer() {
                 <button
                     onClick={loadLogs}
                     disabled={isLoading}
-                    className="px-4 py-2 bg-card border border-border rounded-lg hover:bg-muted transition-colors disabled:opacity-50"
+                    className="flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-lg hover:bg-muted transition-colors disabled:opacity-50"
+                    title="Refrescar datos"
                 >
-                    {isLoading ? 'Cargando...' : 'Refrescar'}
+                    <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
                 </button>
             </div>
 

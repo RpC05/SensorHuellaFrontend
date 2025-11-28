@@ -1,19 +1,19 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Home, Users, Fingerprint, CreditCard, FileText, Shield } from 'lucide-react';
-import type { PageType } from '@/lib/types';
 
-interface SidebarProps {
-  currentPage: PageType;
-  onNavigate: (page: PageType) => void;
-}
+export function Sidebar() {
+  const pathname = usePathname();
 
-export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
   const navItems = [
-    { id: 'dashboard' as PageType, label: 'Dashboard', icon: Home },
-    { id: 'users' as PageType, label: 'Usuarios', icon: Users },
-    { id: 'fingerprints' as PageType, label: 'Huellas', icon: Fingerprint },
-    { id: 'rfid-cards' as PageType, label: 'Tarjetas RFID', icon: CreditCard },
-    { id: 'access-logs' as PageType, label: 'Registros de Acceso', icon: FileText },
-    { id: 'verification' as PageType, label: 'Verificación en Vivo', icon: Shield },
+    { href: '/', label: 'Dashboard', icon: Home },
+    { href: '/users', label: 'Usuarios', icon: Users },
+    { href: '/fingerprints', label: 'Huellas', icon: Fingerprint },
+    { href: '/rfid-cards', label: 'Tarjetas RFID', icon: CreditCard },
+    { href: '/access-logs', label: 'Registros de Acceso', icon: FileText },
+    { href: '/verification', label: 'Verificación en Vivo', icon: Shield },
   ];
 
   return (
@@ -37,12 +37,12 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
       <nav className="flex-1 p-4 space-y-1">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = currentPage === item.id;
+          const isActive = pathname === item.href;
 
           return (
-            <button
-              key={item.id}
-              onClick={() => onNavigate(item.id)}
+            <Link
+              key={item.href}
+              href={item.href}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${isActive
                 ? 'bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-foreground border border-blue-500/30 shadow-sm'
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
@@ -52,7 +52,7 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
               <span className={`font-medium text-sm ${isActive ? 'font-semibold' : ''}`}>
                 {item.label}
               </span>
-            </button>
+            </Link>
           );
         })}
       </nav>
