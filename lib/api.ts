@@ -38,7 +38,9 @@ class ApiService {
       return {} as T;
     }
 
-    return response.json();
+    // Check if response has content before parsing JSON
+    const text = await response.text();
+    return text ? JSON.parse(text) : {} as T;
   }
 
   // ============================================
@@ -240,6 +242,16 @@ class ApiService {
 
   async toggleCardAuthorization(id: number): Promise<void> {
     const response = await fetch(`${API_URL}/access/cards/${id}/toggle-auth`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return this.handleResponse<void>(response);
+  }
+
+  async toggleCardActiveState(id: number): Promise<void> {
+    const response = await fetch(`${API_URL}/access/cards/${id}/toggle-active`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',

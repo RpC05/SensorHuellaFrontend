@@ -144,19 +144,7 @@ export function FingerprintsManagement() {
                         Vaciar Base de Datos
                     </button>
                 </div>
-            </div>
-
-            {/* Info Alert */}
-            <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg flex gap-3">
-                <div className="text-sm text-muted-foreground">
-                    <p className="font-medium text-foreground mb-1">ℹ️ Información:</p>
-                    <ul className="list-disc list-inside space-y-1">
-                        <li>Las huellas se enrollan al crear un usuario en la sección "Usuarios"</li>
-                        <li>Aquí puedes asignar huellas sin asignar a usuarios que las necesiten</li>
-                        <li>Solo los usuarios sin huella pueden recibir asignación</li>
-                    </ul>
-                </div>
-            </div>
+            </div> 
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
