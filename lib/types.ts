@@ -113,6 +113,7 @@ export interface AccessLogResponseDTO {
   personName?: string;
   cargo?: string;
   accessType: string;
+  authenticationMethod?: string; // "RFID" or "FINGERPRINT"
   authorized: boolean;
   accessTime: string; // ISO datetime string
   location?: string;

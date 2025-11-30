@@ -48,7 +48,7 @@ export function AccessLogsViewer() {
     });
 
     const exportToCSEV = () => {
-        const headers = ['ID', 'Fecha/Hora', 'UID Tarjeta', 'Persona', 'Cargo', 'Tipo Acceso', 'Autorizado', 'Ubicación'];
+        const headers = ['ID', 'Fecha/Hora', 'UID Tarjeta', 'Persona', 'Cargo', 'Tipo Acceso', 'Método', 'Autorizado', 'Ubicación'];
         const rows = filteredLogs.map(log => [
             log.id,
             new Date(log.accessTime).toLocaleString(),
@@ -56,6 +56,7 @@ export function AccessLogsViewer() {
             log.personName || 'N/A',
             log.cargo || 'N/A',
             log.accessType,
+            log.authenticationMethod || 'RFID',
             log.authorized ? 'Sí' : 'No',
             log.location || 'N/A',
         ]);
@@ -84,7 +85,7 @@ export function AccessLogsViewer() {
                         Registros de Acceso
                     </h2>
                     <p className="text-muted-foreground mt-1">
-                        Historial de accesos con tarjetas RFID
+                        Historial de accesos por RFID y huella digital
                     </p>
                 </div>
 
@@ -189,6 +190,7 @@ export function AccessLogsViewer() {
                                     <th className="px-6 py-4 text-left text-sm font-semibold">Persona</th>
                                     <th className="px-6 py-4 text-left text-sm font-semibold">Cargo</th>
                                     <th className="px-6 py-4 text-left text-sm font-semibold">Tipo</th>
+                                    <th className="px-6 py-4 text-left text-sm font-semibold">Método</th>
                                     <th className="px-6 py-4 text-center text-sm font-semibold">Autorizado</th>
                                     <th className="px-6 py-4 text-left text-sm font-semibold">Ubicación</th>
                                 </tr>
@@ -213,6 +215,17 @@ export function AccessLogsViewer() {
                                         </td>
                                         <td className="px-6 py-4 text-sm">
                                             {log.accessType}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {log.authenticationMethod === 'FINGERPRINT' ? (
+                                                <div className="inline-flex items-center gap-1 px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded-full">
+                                                    🔐 HUELLA
+                                                </div>
+                                            ) : (
+                                                <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full">
+                                                    💳 RFID
+                                                </div>
+                                            )}
                                         </td>
                                         <td className="px-6 py-4 text-center">
                                             {log.authorized ? (
