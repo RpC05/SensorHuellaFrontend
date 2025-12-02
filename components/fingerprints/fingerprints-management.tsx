@@ -347,7 +347,11 @@ export function FingerprintsManagement() {
                 <ConfirmDialog
                     isOpen={showDeleteConfirm}
                     title="¿Eliminar Huella?"
-                    message={`¿Estás seguro de que deseas eliminar la huella ID ${selectedFingerprint.fingerprintId}${selectedFingerprint.user ? ` de ${selectedFingerprint.user.fullName}` : ''}? Esta acción no se puede deshacer.`}
+                    message={
+                        selectedFingerprint.user 
+                            ? `⚠️ ADVERTENCIA: Esta huella está asignada a ${selectedFingerprint.user.fullName}.\n\nAl eliminar esta huella, el usuario también será DESACTIVADO automáticamente.\n\n¿Estás seguro de que deseas continuar?`
+                            : `¿Estás seguro de que deseas eliminar la huella ID ${selectedFingerprint.fingerprintId}? Esta acción no se puede deshacer.`
+                    }
                     confirmText="Sí, Eliminar"
                     cancelText="Cancelar"
                     onConfirm={handleDelete}
